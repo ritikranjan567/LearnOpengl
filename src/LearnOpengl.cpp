@@ -17,6 +17,20 @@ void processInput(GLFWwindow* window) {
 int main()
 {
 	std::cout << "Hello CMake." << std::endl;
+	// glm test
+	glm::vec4 vec(1.0f, 1.0f, 0.0f, 1.0f);
+	glm::mat4 trans = glm::mat4(1.0f); // identify matrix
+
+	// trans = glm::translate(trans, glm::vec3(1.0f, 1.0f, 0.0f)); // converts to translation matrix
+	// vec = trans * vec;
+	//std::cout << vec.x << " " << vec.y << " " << vec.z << std::endl;
+
+	//trans = glm::rotate(trans, glm::radians(-90.0f), glm::vec3(0.0f, 0.0f, 1.0f)); // rotate on z-direction
+	//// now scale it to half
+	//trans = glm::scale(trans, glm::vec3(0.5, 0.5, 0.0));
+	//vec = trans * vec; // now the vec is rotated and scaled
+	//std::cout << vec.x << " " << vec.y << " " << vec.z << std::endl;
+
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);

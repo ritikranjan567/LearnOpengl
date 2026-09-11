@@ -3,7 +3,9 @@
 #
 
 # Add source to this project's executable.
-add_executable (LearnOpengl "LearnOpengl.cpp" "LearnOpengl.h" "glad.c")
+add_executable (LearnOpengl "LearnOpengl.cpp" "LearnOpengl.h"
+	"${CMAKE_CURRENT_SOURCE_DIR}/linking/lib/glad.c"
+	"${CMAKE_CURRENT_SOURCE_DIR}/linking/lib/stb.cpp")
 
 target_link_libraries(LearnOpengl PUBLIC opengl32.lib)
 target_include_directories(LearnOpengl PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/linking/include)
