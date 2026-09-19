@@ -3,7 +3,7 @@
 #
 
 # Add source to this project's executable.
-add_executable (LearnOpengl "LearnOpengl.cpp" "LearnOpengl.h"
+add_executable (LearnOpengl "LearnOpengl.cpp" "LearnOpengl.h" "Shader.cpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/linking/lib/glad.c"
 	"${CMAKE_CURRENT_SOURCE_DIR}/linking/lib/stb.cpp")
 

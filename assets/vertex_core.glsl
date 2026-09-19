@@ -1,15 +1,21 @@
 #version 330 core //specifies the version of opengl
 layout (location = 0) in vec3 aPos;
-// Above says for layout/data go to the 0th index get 3D vect name it aPos.
+// Above says for layout/data go to the 0th index get attribute 3D vect name it aPos.
+layout (location = 1) in vec3 aColor;
 
 // Now lets set and output a color that will be picked by framentshader
 // out vec4 color;
+out vec3 ourColor;
+
+//set transform matrix global
+uniform mat4 transform; // set in code [efficient when constant value for multiple loops]
 
 // below program runs every frame
 
 void main() {
     // gl_Position global var must be initialize
-    gl_Position = vec4(aPos, 1.0);
+    gl_Position = transform * vec4(aPos, 1.0);
+    ourColor = aColor;
 
     // if (aPos.x < 0.0f) {
     //     color = vec4(1.0f, 0.0f, 0.0f, 1.0f);

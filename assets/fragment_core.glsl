@@ -4,10 +4,12 @@ out vec4 FragColor;
 
 //lets read from color input and set
 // in vec4 color; 
+in vec3 ourColor;
 
 //fragment shadder is used to define color of the pixel
 void main() {
-    FragColor = vec4(0.9f, 0.4f, 0.3f, 1.0f);
+    // FragColor = vec4(1.0f, 0.2f, 0.6f, 1.0f);
     // FragColor = color;
+    FragColor = vec4(ourColor, 1.0f);
 }
 

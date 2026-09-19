@@ -73,7 +73,7 @@ int main()
 	unsigned int vertexShader;
 	vertexShader = glCreateShader(GL_VERTEX_SHADER);
 
-	std::string vertShaderSrc = loadShaderSrc("src/assets/vertex_core.glsl");
+	std::string vertShaderSrc = loadShaderSrc("assets/vertex_core.glsl");
 	const GLchar* vertShader = vertShaderSrc.c_str();
 	glShaderSource(vertexShader, 1, &vertShader, NULL);
 	glCompileShader(vertexShader);
@@ -88,7 +88,7 @@ int main()
 	// compile fragment shader
 	unsigned int fragmentShaders[2];
 	fragmentShaders[0] = glCreateShader(GL_FRAGMENT_SHADER);
-	std::string fragmentShaderSrc = loadShaderSrc("src/assets/fragment_core.glsl");
+	std::string fragmentShaderSrc = loadShaderSrc("assets/fragment_core.glsl");
 	const GLchar* fragShader = fragmentShaderSrc.c_str();
 	glShaderSource(fragmentShaders[0], 1, &fragShader, NULL);
 	glCompileShader(fragmentShaders[0]);
@@ -101,7 +101,7 @@ int main()
 	}
 
 	fragmentShaders[1] = glCreateShader(GL_FRAGMENT_SHADER);
-	fragmentShaderSrc = loadShaderSrc("src/assets/fragment_core2.glsl");
+	fragmentShaderSrc = loadShaderSrc("assets/fragment_core2.glsl");
 	fragShader = fragmentShaderSrc.c_str();
 	glShaderSource(fragmentShaders[1], 1, &fragShader, NULL);
 	glCompileShader(fragmentShaders[1]);
@@ -163,14 +163,14 @@ int main()
 	// rectangle/square
 	float vertices[] = {
 		//triangle 1
-		-0.5f, 0.5f, 0.0f, // left-top
-		0.5f, 0.5f, 0.0f, // right-top
-		-0.5f, -0.5f, 0.0f, // left-bottom
+		-0.5f, 0.5f, 0.0f,  /*color*/ 1.0f, 1.0f, 0.5f, // left-top
+		0.5f, 0.5f, 0.0f,   /*color*/ 0.5f, 1.0f, 0.75f, // right-top
+		-0.5f, -0.5f, 0.0f, /*color*/ 0.6f, 1.0f, 0.2f,  // left-bottom
 
 		// triagnle 2
 		// 0.5f, 0.5f, 0.0f, // right-top (commented-duplicate)
 		// -0.5f, -0.5f, 0.0f, // left-bottom (commented-duplicate)
-		0.5f, -0.5f, 0.0f // right-bottom
+		0.5f, -0.5f, 0.0f,  /*color*/ 1.0f, 0.2f, 1.0f // right-bottom
 	}; // see there is two share vertices which can be optimized
 	
 	// to eliminate this copy data, use concept of element buffer object array
@@ -187,18 +187,37 @@ int main()
 		3, // here 3d if 2D it size of vertex should be 2
 		GL_FLOAT, // type of each coordinate
 		GL_FALSE, // wheather to normalize
-		sizeof(float) * 3, // size of each vertex
-		(void*)0 // void/nullptr
+		sizeof(float) * 6, // size of each vertex
+		nullptr // void/nullptr
 	);
 	// now tell opengGL shader input data is at location = 0
-	glEnableVertexAttribArray(0); 
+	glEnableVertexAttribArray(0);
+
+	// lets define attribute for color in vertices
+	glVertexAttribPointer(
+		1, // as location = 1,
+		3, // still 3 as rgb
+		GL_FLOAT,
+		GL_FALSE,
+		sizeof(GL_FLOAT) * 6,
+		(void*)(3 * sizeof(GL_FLOAT))
+	);
+	glEnableVertexAttribArray(1);
 	// now in main loop can draw
 
 	// here using element buffer object
 	glGenBuffers(1, &elementBufferArrayObj);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBufferArrayObj);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
+	
+	// define transform matrix to pass it to shader
+	glm::mat4 trans = glm::mat4(1.0f); // unity 4x4 matrix
+	trans = glm::rotate(trans, glm::radians(45.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+	// to pass it
+	glUseProgram(shaderPrograms[0]);
+	glUniformMatrix4fv(glGetUniformLocation(shaderPrograms[0], "transform"), 1, GL_FALSE, glm::value_ptr(trans));
+	glUseProgram(shaderPrograms[1]);
+	glUniformMatrix4fv(glGetUniformLocation(shaderPrograms[1], "transform"), 1, GL_FALSE, glm::value_ptr(trans));
 
 
 	while (!glfwWindowShouldClose(window)) {
@@ -213,6 +232,14 @@ int main()
 
 		
 		glClear(GL_COLOR_BUFFER_BIT);
+
+		// lets rotate the square
+		for (int i = 0; i < 2; i++) {
+			trans = glm::rotate(trans, glm::radians((float)(glfwGetTime() / 100.0f)), glm::vec3(0.0f, 0.0f, 1.0f));
+			glUseProgram(shaderPrograms[i]);
+			glUniformMatrix4fv(glGetUniformLocation(shaderPrograms[i], "transform"), 1, GL_FALSE, glm::value_ptr(trans));
+		}
+
 		
 		// draw shapes
 		glBindVertexArray(vertexArrayObj); // optional if only single VAO
