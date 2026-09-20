@@ -22,4 +22,5 @@ public: // public methods
 
     // uniform function
     void setMat4(const std::string& name, glm::mat4 val);
+    void setInt(const std::string& name, int val);
 };
