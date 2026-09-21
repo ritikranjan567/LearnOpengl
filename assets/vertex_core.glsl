@@ -19,7 +19,8 @@ uniform mat4 transform; // set in code [efficient when constant value for multip
 
 void main() {
     // gl_Position global var must be initialize
-    gl_Position = vec4(aPos, 1.0);
+    // gl_Position = vec4(aPos, 1.0);
+    gl_Position = transform * vec4(aPos, 1.0f);
     ourColor = aColor;
     TextCoord = aTextCoord;
 

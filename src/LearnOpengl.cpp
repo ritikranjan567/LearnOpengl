@@ -4,6 +4,7 @@
 #include "LearnOpengl.h"
 #include "Shader.h"
 #include <stb_image/stb_image.h>
+#include "Texture.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
@@ -124,52 +125,55 @@ int main()
 	glEnableVertexAttribArray(2);
 	// now in main loop can draw
 
-	unsigned int texture1, texture2;
+	// unsigned int texture1, texture2;
 
-	glGenTextures(1, &texture1);
-	glBindTexture(GL_TEXTURE_2D, texture1);
+	// glGenTextures(1, &texture1);
+	// glBindTexture(GL_TEXTURE_2D, texture1);
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	// glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	// glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-	// now set image interpolation/filtering
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	// // now set image interpolation/filtering
+	// glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	// glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
-	//load image
-	int width, height, nChannels;
-	stbi_set_flip_vertically_on_load(true);
-	unsigned char* data = stbi_load("assets/texture/obama10.jpg", &width, &height, &nChannels, 0);
+	// //load image
+	// int width, height, nChannels;
+	// stbi_set_flip_vertically_on_load(true);
+	// unsigned char* data = stbi_load("assets/texture/obama10.jpg", &width, &height, &nChannels, 0);
 
-	if (data) {
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
-	}
-	else {
-		std::cout << "Failed to load image texture" << std::endl;
-	}
+	// if (data) {
+	// 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+	// 	glGenerateMipmap(GL_TEXTURE_2D);
+	// }
+	// else {
+	// 	std::cout << "Failed to load image texture" << std::endl;
+	// }
 
-	stbi_image_free(data);
+	// stbi_image_free(data);
+
+	Texture texture1;
+	texture1.loadImage(GL_RGB, "assets/texture/obama10.jpg");
 	
-	glGenTextures(1, &texture2);
-	glBindTexture(GL_TEXTURE_2D, texture2);
+	// glGenTextures(1, &texture2);
+	// glBindTexture(GL_TEXTURE_2D, texture2);
 
-	data = stbi_load("assets/texture/americanflag1__1_.png",
-		&width, &height, &nChannels, 0
-	);
+	// data = stbi_load("assets/texture/americanflag1__1_.png",
+	// 	&width, &height, &nChannels, 0
+	// );
 
-	if (data) {
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
-	}
-	else {
-		std::cout << "Unable to load american flag" << std::endl;
-	}
-	stbi_image_free(data);
+	// if (data) {
+	// 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+	// 	glGenerateMipmap(GL_TEXTURE_2D);
+	// }
+	// else {
+	// 	std::cout << "Unable to load american flag" << std::endl;
+	// }
+	// stbi_image_free(data);
 	
 	shader.activate();
 	shader.setInt("texture1", 0);
-	shader.setInt("texture2", 1);
+	// shader.setInt("texture2", 1);
 
 
 
@@ -182,7 +186,8 @@ int main()
 	glm::mat4 trans = glm::mat4(1.0f); // unity 4x4 matrix
 	// trans = glm::rotate(trans, glm::radians(45.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 	shader.activate();
-	glBindTexture(GL_TEXTURE_2D, texture1);
+	texture1.bindTexture();
+	// glBindTexture(GL_TEXTURE_2D, texture1);
 	// shader.setMat4("transform", trans);
 	// shader2.activate();
 	// shader2.setMat4("transform", trans);
@@ -205,10 +210,12 @@ int main()
 
 		
 		glClear(GL_COLOR_BUFFER_BIT);
+
+		texture1.bindAndActivate(GL_TEXTURE0);
 		
-		glActiveTexture(GL_TEXTURE0);
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, texture2);
+		// glActiveTexture(GL_TEXTURE0);
+		// glActiveTexture(GL_TEXTURE1);
+		// glBindTexture(GL_TEXTURE_2D, texture2);
 
 		// lets rotate the square
 		// for (int i = 0; i < 2; i++) {
@@ -216,9 +223,9 @@ int main()
 		// 	glUseProgram(shaderPrograms[i]);
 		// 	glUniformMatrix4fv(glGetUniformLocation(shaderPrograms[i], "transform"), 1, GL_FALSE, glm::value_ptr(trans));
 		// }
-		// trans = glm::rotate(trans, glm::radians((float)(glfwGetTime() / 100.0f)), glm::vec3(0.0f, 0.0f, 1.0f));
+		trans = glm::rotate(trans, glm::radians((float)(glfwGetTime() / 100.0f)), glm::vec3(0.0f, 1.0f, 0.0f));
 		shader.activate();
-		// shader.setMat4("transform", trans);
+		shader.setMat4("transform", trans);
 
 		
 		// draw shapes
