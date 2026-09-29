@@ -5,6 +5,13 @@
 #include "Shader.h"
 #include <stb_image/stb_image.h>
 #include "Texture.h"
+#include "io/Keyboard.h"
+#include "io/Mouse.h"
+#include "io/Joystick.h"
+
+glm::mat4 mouseTransform = glm::mat4(1.0f);
+glm::mat4 transform = glm::mat4(1.0f);
+Joystick mainj(0);
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
@@ -12,9 +19,51 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 }
 
 void processInput(GLFWwindow* window) {
-	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+	if (Keyboard::keyWentDown(GLFW_KEY_ESCAPE)) {
 		glfwSetWindowShouldClose(window, true);
 	}
+
+	if (Keyboard::key(GLFW_KEY_W)) {
+		transform = glm::translate(transform, glm::vec3(0.0f, 0.01f, 0.0f));
+	}
+
+	if (Keyboard::key(GLFW_KEY_S)) {
+		transform = glm::translate(transform, glm::vec3(0.0f, -0.01f, 0.0f));
+	}
+
+	if (Keyboard::key(GLFW_KEY_A)) {
+		transform = glm::translate(transform, glm::vec3(-0.01f, 0.0f, 0.0f));
+	}
+
+	if (Keyboard::key(GLFW_KEY_D)) {
+		transform = glm::translate(transform, glm::vec3(0.01f, 0.0f, 0.0f));
+	}
+
+	mainj.update();
+
+	float lx = mainj.axesState(GLFW_JOYSTICK_AXES_LEFT_STICK_X);
+	float ly = mainj.axesState(GLFW_JOYSTICK_AXES_LEFT_STICK_Y);
+
+	// CHECK for dead zone and apply logic
+	if (std::abs(lx) > 0.5f) {
+		transform = glm::translate(transform, glm::vec3(lx/100, 0.0f, 0.0f));
+	}
+	if (std::abs(ly) > 0.5f) {
+		transform = glm::translate(transform, glm::vec3(0.0f, -ly/100, 0.0f));
+	}
+
+	// float rt = mainj.axesState(GLFW_JOYSTICK_AXES_RIGHT_TRIGGER) / 2 + 0.5f;
+
+	// if (rt > 0.5f) {
+	// 	transform = glm::scale(transform, glm::vec3(1 + rt/10, 1 + rt/10, 0.0f));
+	// }
+
+	// float lt = mainj.axesState(GLFW_JOYSTICK_AXES_LEFT_TRIGGER) / 2 + 0.5f;
+
+	// if (lt > 0.5f) {
+	// 	transform = glm::scale(transform, glm::vec3(1 - lt/10, 1 - lt/10, 0.0f));
+	// }
+
 }
 
 int main()
@@ -50,7 +99,17 @@ int main()
 
 	glViewport(0, 0, 800, 600);
 
+	// set key callbacks
+	glfwSetKeyCallback(window, Keyboard::keyCallback);
+
+	glfwSetCursorPosCallback(window, Mouse::cursorPosCallback);
+
+	glfwSetMouseButtonCallback(window, Mouse::mouseButtonCallback);
+
+	glfwSetScrollCallback(window, Mouse::mouseWheelCallback);
+
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+	// -------------
 
 	Shader shader("assets/vertex_core.glsl", "assets/fragment_core.glsl");
 	Shader shader2("assets/vertex_core.glsl", "assets/fragment_core2.glsl");
@@ -152,8 +211,9 @@ int main()
 
 	// stbi_image_free(data);
 
-	Texture texture1;
+	Texture texture1, texture2;
 	texture1.loadImage(GL_RGB, "assets/texture/obama10.jpg");
+	texture2.loadImage(GL_RGBA, "assets/texture/americanflag1__1_.png");
 	
 	// glGenTextures(1, &texture2);
 	// glBindTexture(GL_TEXTURE_2D, texture2);
@@ -173,7 +233,7 @@ int main()
 	
 	shader.activate();
 	shader.setInt("texture1", 0);
-	// shader.setInt("texture2", 1);
+	shader.setInt("texture2", 1);
 
 
 
@@ -187,6 +247,7 @@ int main()
 	// trans = glm::rotate(trans, glm::radians(45.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 	shader.activate();
 	texture1.bindTexture();
+	texture2.bindTexture();
 	// glBindTexture(GL_TEXTURE_2D, texture1);
 	// shader.setMat4("transform", trans);
 	// shader2.activate();
@@ -198,10 +259,18 @@ int main()
 	// glUniformMatrix4fv(glGetUniformLocation(shaderPrograms[1], "transform"), 1, GL_FALSE, glm::value_ptr(trans));
 
 
+	mainj.update();
+	if (mainj.isPresent()) {
+		std::cout << "Controller connected. Name: " << mainj.getName() << std::endl;
+	} else {
+		std::cout << "No controller added" << std::endl;
+	}
+
+
 	while (!glfwWindowShouldClose(window)) {
 		processInput(window);
 
-		if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
+		if (Mouse::button(GLFW_MOUSE_BUTTON_LEFT)) {
 			glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		}
 		else {
@@ -212,6 +281,8 @@ int main()
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		texture1.bindAndActivate(GL_TEXTURE0);
+		texture2.activateTexFromUnit(GL_TEXTURE1);
+		texture2.bindTexture();
 		
 		// glActiveTexture(GL_TEXTURE0);
 		// glActiveTexture(GL_TEXTURE1);
@@ -223,9 +294,9 @@ int main()
 		// 	glUseProgram(shaderPrograms[i]);
 		// 	glUniformMatrix4fv(glGetUniformLocation(shaderPrograms[i], "transform"), 1, GL_FALSE, glm::value_ptr(trans));
 		// }
-		trans = glm::rotate(trans, glm::radians((float)(glfwGetTime() / 100.0f)), glm::vec3(0.0f, 1.0f, 0.0f));
+		// trans = glm::rotate(trans, glm::radians((float)(glfwGetTime() / 100.0f)), glm::vec3(0.0f, 1.0f, 0.0f));
 		shader.activate();
-		shader.setMat4("transform", trans);
+		shader.setMat4("transform", transform);
 
 		
 		// draw shapes

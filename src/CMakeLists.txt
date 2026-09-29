@@ -4,6 +4,7 @@
 
 # Add source to this project's executable.
 add_executable (LearnOpengl "LearnOpengl.cpp" "LearnOpengl.h" "Shader.cpp" "Texture.cpp"
+	"io/Keyboard.cpp" "io/Mouse.cpp" "io/Joystick.cpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/linking/lib/glad.c"
 	"${CMAKE_CURRENT_SOURCE_DIR}/linking/lib/stb.cpp")
 

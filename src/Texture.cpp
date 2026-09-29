@@ -17,6 +17,8 @@ void Texture::loadImage(GLint format, const char* filePath)
     int width, height, nChannels;
     stbi_set_flip_vertically_on_load(true);
 
+    bindTexture();
+
     unsigned char* data = stbi_load(filePath, &width, &height, &nChannels, 0);
     
     if (data) {
@@ -41,6 +43,6 @@ void Texture::activateTexFromUnit(GLenum unit)
 
 void Texture::bindAndActivate(GLenum unit)
 {
-    bindTexture();
     activateTexFromUnit(unit);
+    bindTexture();
 }
