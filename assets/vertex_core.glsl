@@ -13,15 +13,19 @@ out vec3 ourColor;
 out vec2 TextCoord;
 
 //set transform matrix global
-uniform mat4 transform; // set in code [efficient when constant value for multiple loops]
+// uniform mat4 transform; // set in code [efficient when constant value for multiple loops]
+uniform mat4 model;
+uniform mat4 view;
+uniform mat4 projection;
 
 // below program runs every frame
 
 void main() {
     // gl_Position global var must be initialize
     // gl_Position = vec4(aPos, 1.0);
-    gl_Position = transform * vec4(aPos, 1.0f);
-    ourColor = aColor;
+    // gl_Position = transform * vec4(aPos, 1.0f);
+    // ourColor = aColor;
+    gl_Position = projection * view * model * vec4(aPos, 1.0f);
     TextCoord = aTextCoord;
 
     // if (aPos.x < 0.0f) {
